@@ -160,4 +160,4 @@ cython_debug/
 #.idea/
 
 
-router-filtering/*
+router_filtering/
