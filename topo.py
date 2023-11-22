@@ -32,7 +32,8 @@ def run():
     net.get('server1').cmd('iperf -s -p 8888 &')
     net.get('server2').cmd('iperf -s -u -p 8844 &')
      
-    net.get('r').cmd('sudo sysctl net.ipv4.ip_forward=0')
+    net.get('r').cmd('sudo sysctl net.ipv4.ip_forward=0') # aparentemente aqui muda para 1, pra poder acessar sites de verdade
+    # aparentemente também vai ter que rolar um nat pra mascarar o ip do host do mininet para o ip real da maquina
     net.get('r').cmd('iptables -A OUTPUT -p tcp --tcp-flags RST RST -j DROP')
         
     for _, v in net.nameToNode.items():
