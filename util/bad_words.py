@@ -5,3 +5,7 @@ def filter_profanity(string:str):
 
 def spot_profanity(string:str):
     return profanity.contains_profanity(string)
+
+
+if __name__ == '__main__':
+    print(spot_profanity('Hello '))
