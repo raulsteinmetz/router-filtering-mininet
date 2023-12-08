@@ -62,7 +62,7 @@ def main():
     def print_http_payload(pkt):
         print(f"http package sniffed on \
             {'internal' if pkt.sniffed_on == internal_interface else 'external'} \
-            side with content: {get_http_payload}\n", end='\n\n')
+            side with content: {get_http_payload(pkt)}\n", end='\n\n')
 
     def handle(pkt):
         if sent(pkt):
