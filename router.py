@@ -48,7 +48,9 @@ def main():
     def print_http_payload(pkt):
         if Raw in pkt:
             payload = pkt[Raw].load
-            print(f"http package sniffed on {'internal' if pkt.sniffed_on == internal_interface else 'external'} side with content: {payload}\n", end='\n\n')
+            print(f"http package sniffed on \
+                {'internal' if pkt.sniffed_on == internal_interface else 'external'} \
+                side with content: {payload}\n", end='\n\n')
 
     def handle(pkt):
         if sent(pkt):
