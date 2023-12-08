@@ -3,8 +3,6 @@ from scapy.layers.inet import IP, TCP, UDP, ICMP
 from scapy.layers.l2 import Ether
 
 
-
-
 def main():
     internal_interface = 'r-eth0'
     external_interface = 'r-eth1'
