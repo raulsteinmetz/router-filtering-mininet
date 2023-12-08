@@ -54,12 +54,6 @@ def main():
             {'internal' if pkt.sniffed_on == internal_interface else 'external'} \
             side with content: {get_http_payload}\n", end='\n\n')
 
-    def check_for_bad_words(str):
-        return spot_profanity(str)
-    
-    def censure_bad_words(str):
-        return filter_profanity(str)
-
     def handle(pkt):
         if sent(pkt):
             return
@@ -71,9 +65,7 @@ def main():
         if is_http_response(pkt):
             if Raw in pkt:
                 print_http_payload(pkt)
-                if (check_for_bad_words(get_http_payload(pkt))):
-                    print(check_for_bad_words(get_http_payload(pkt)))
-                    print(get_http_payload(pkt))
+                if (spot_profanity(get_http_payload(pkt)) == True):
                     print('PROFANITY DETECTED ON HTTP PKT PAYLOAD')
 
         if pkt.sniffed_on == internal_interface:
