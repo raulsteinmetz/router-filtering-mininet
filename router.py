@@ -33,11 +33,11 @@ def main():
 
     def handle_internal(pkt):
         new = update_layer_2(pkt)
-        sendp(new, iface=external_interface)
+        sendp(new, iface=external_interface, verbose=False)
 
     def handle_external(pkt):
         new = update_layer_2(pkt)
-        sendp(new, iface=internal_interface)
+        sendp(new, iface=internal_interface, verbose=False)
 
     def is_http_request(pkt):
         return TCP in pkt and pkt[TCP].dport == 80
@@ -46,10 +46,9 @@ def main():
         return TCP in pkt and pkt[TCP].sport == 80
 
     def print_http_payload(pkt):
-        print('http package sniffed')
         if Raw in pkt:
             payload = pkt[Raw].load
-            print("HTTP payload:", payload)
+            print(f"http package sniffed on {'internal' if pkt.sniffed_on == internal_interface else 'external'} side with content: {payload}\n", end='\n\n')
 
     def handle(pkt):
         if sent(pkt):
@@ -59,7 +58,7 @@ def main():
             print_http_payload(pkt)
 
         if is_http_response(pkt):
-            print(print_http_payload(pkt))
+            print_http_payload(pkt)
 
         if pkt.sniffed_on == internal_interface:
             handle_internal(pkt)
