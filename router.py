@@ -47,7 +47,17 @@ def main():
         return TCP in pkt and pkt[TCP].sport == 80
 
     def get_http_payload(pkt):
-        return pkt[Raw].load
+        if Raw in pkt:
+            payload_bytes = pkt[Raw].load
+            try:
+                # Decode the bytes to a string using UTF-8 encoding
+                payload_str = payload_bytes.decode('utf-8')
+                return payload_str
+            except UnicodeDecodeError:
+                # In case of decode error, return a representation of the bytes
+                return repr(payload_bytes)
+        else:
+            return None
 
     def print_http_payload(pkt):
         print(f"http package sniffed on \
