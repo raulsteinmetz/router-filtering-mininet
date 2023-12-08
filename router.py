@@ -39,10 +39,14 @@ def main():
         new = update_layer_2(pkt)
         sendp(new, iface=internal_interface)
 
-    def is_http_packet(pkt):
+    def is_http_request(pkt):
         return TCP in pkt and pkt[TCP].dport == 80
 
+    def is_http_response(pkt):
+        return TCP in pkt and pkt[TCP].sport == 80
+
     def print_http_payload(pkt):
+        print('http package sniffed')
         if Raw in pkt:
             payload = pkt[Raw].load
             print("HTTP payload:", payload)
@@ -51,8 +55,11 @@ def main():
         if sent(pkt):
             return
 
-        if is_http_packet(pkt):
+        if is_http_request(pkt):
             print_http_payload(pkt)
+
+        if is_http_response(pkt):
+            print(print_http_payload(pkt))
 
         if pkt.sniffed_on == internal_interface:
             handle_internal(pkt)
