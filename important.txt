@@ -13,6 +13,8 @@ important commands:
 - python3 router.py (router main)
 
 if you are going to run it:
-- make sure to download scapy with pip3
+- make sure to install all pip3 packages with sudo cause mininet only runs on sudo
+- download scapy with pip3
 - download mininet from apt
 - download curl from apt
+- download mininet in pip3 also

@@ -1,6 +1,7 @@
 from scapy.all import *
 from scapy.layers.inet import IP, TCP
 from scapy.layers.l2 import Ether
+from util.bad_words import spot_profanity, filter_profanity
 
 def main():
     internal_interface = 'r-eth0'
@@ -45,22 +46,35 @@ def main():
     def is_http_response(pkt):
         return TCP in pkt and pkt[TCP].sport == 80
 
+    def get_http_payload(pkt):
+        return pkt[Raw].load
+
     def print_http_payload(pkt):
-        if Raw in pkt:
-            payload = pkt[Raw].load
-            print(f"http package sniffed on \
-                {'internal' if pkt.sniffed_on == internal_interface else 'external'} \
-                side with content: {payload}\n", end='\n\n')
+        print(f"http package sniffed on \
+            {'internal' if pkt.sniffed_on == internal_interface else 'external'} \
+            side with content: {get_http_payload}\n", end='\n\n')
+
+    def check_for_bad_words(str):
+        return spot_profanity(str)
+    
+    def censure_bad_words(str):
+        return filter_profanity(str)
 
     def handle(pkt):
         if sent(pkt):
             return
 
         if is_http_request(pkt):
-            print_http_payload(pkt)
+            if Raw in pkt:
+                print_http_payload(pkt)
 
         if is_http_response(pkt):
-            print_http_payload(pkt)
+            if Raw in pkt:
+                print_http_payload(pkt)
+                if (check_for_bad_words(get_http_payload(pkt))):
+                    print(check_for_bad_words(get_http_payload(pkt)))
+                    print(get_http_payload(pkt))
+                    print('PROFANITY DETECTED ON HTTP PKT PAYLOAD')
 
         if pkt.sniffed_on == internal_interface:
             handle_internal(pkt)
