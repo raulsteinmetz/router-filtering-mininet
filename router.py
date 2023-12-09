@@ -30,7 +30,7 @@ def main():
 
         pkt[Ether].src = None
         pkt[Ether].dst = None
-        
+
         return checksum_recalc(pkt)
 
     def handle_internal(pkt):
@@ -85,12 +85,19 @@ def main():
                 print(f"Contains profanity: {contains_profanity}")
                 print(f"Filtered content: {filtered_content}")
 
+                if contains_profanity:
+                    # Convert the filtered content back to bytes
+                    filtered_payload_bytes = filtered_content.encode('utf-8')
+                    # Update the packet's payload
+                    pkt[Raw].load = filtered_payload_bytes
+                    # Recalculate checksums
+                    pkt = checksum_recalc(pkt)
+
         if pkt.sniffed_on == internal_interface:
             handle_internal(pkt)
         elif pkt.sniffed_on == external_interface:
             handle_external(pkt)
 
-    sniff(iface=[internal_interface, external_interface], filter='ip', prn=handle)
 
 if __name__ == '__main__':
     main()
