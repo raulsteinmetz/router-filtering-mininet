@@ -70,7 +70,27 @@ def main():
         elif mode == 'filter':
             return spot_profanity(convert_load_to_string(get_http_payload(pkt))), filter_profanity(get_http_payload(pkt))
 
-    
+
+    def adjust_http_content_length(pkt, new_payload):
+        if Raw in pkt:
+            http_payload = pkt[Raw].load.decode('utf-8')
+            headers, body = http_payload.split("\r\n\r\n", 1)
+
+            # Modify the body here (new_payload should be a string)
+            body = new_payload
+
+            # Update Content-Length
+            headers_lines = headers.split("\r\n")
+            for i, line in enumerate(headers_lines):
+                if line.startswith("Content-Length:"):
+                    headers_lines[i] = "Content-Length: " + str(len(body))
+                    break
+
+            new_http_payload = "\r\n".join(headers_lines) + "\r\n\r\n" + body
+            pkt[Raw].load = new_http_payload.encode('utf-8')
+
+        return pkt
+
 
     def handle(pkt):
         if sent(pkt):
