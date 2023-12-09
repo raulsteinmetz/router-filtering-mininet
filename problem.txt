@@ -1,0 +1,2 @@
+aparentemente tem 2 tipos de mensagem que passam, uma com os headders do http e outra sem, so com o html
+tenho que atualizar o header do http pra n ser negado do outro lado, mas n sei como ainda

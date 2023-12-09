@@ -22,7 +22,6 @@ def main():
         del pkt[IP].chksum
         del pkt[IP].payload.chksum
         if TCP in pkt:
-            print('deleting tcp checksum')
             del pkt[TCP].chksum # added layer 4 chksum recalc
         return pkt.__class__(bytes(pkt))
 
@@ -71,6 +70,7 @@ def main():
             return spot_profanity(convert_load_to_string(get_http_payload(pkt))), filter_profanity(get_http_payload(pkt))
 
 
+    # inacuratte function, just for reference on http header handle
     def adjust_http_content_length(pkt, new_payload):
         if Raw in pkt:
             http_payload = pkt[Raw].load.decode('utf-8')
@@ -99,19 +99,31 @@ def main():
 
         if is_http_request(pkt):
             if has_http_payload(pkt):
-                print_http_payload(pkt)
+                # print_http_payload(pkt)
+                pass
 
         if is_http_response(pkt):
             if has_http_payload(pkt):
                 payload_b = get_http_payload(pkt)
-                payload_b_headers, payload_b_body = payload_b.split("\r\n\r\n", 1)
+                payload_s = payload_b.decode('utf-8')
 
-                payload_s_body = payload_b_body.decode('utf-8')
+                print(payload_s)
+                print(payload_b)
 
-                contains_profanity, filtered_content = handle_profanity(payload_s_body, mode='filter')
+                print('\n' * 10)
 
-                print(f"Contains profanity: {contains_profanity}")
-                print(f"Filtered content: {filtered_content}")
+                # try:
+                #     payload_s_headers, payload_s_body = payload_s.split("\r\n\r\n", 1)
+                #     print(payload_s_body)
+                # except:
+                #     print('couldnt')
+                #     print(payload_s)
+
+
+                # contains_profanity, filtered_content = handle_profanity(payload_s_body, mode='filter')
+
+                # print(f"Contains profanity: {contains_profanity}")
+                # print(f"Filtered content: {filtered_content}")
 
 
 
