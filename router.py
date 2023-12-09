@@ -21,6 +21,9 @@ def main():
     def checksum_recalc(pkt):
         del pkt[IP].chksum
         del pkt[IP].payload.chksum
+        if TCP in pkt:
+            print('deleting tcp checksum')
+            del pkt[TCP].chksum # added layer 4 chksum recalc
         return pkt.__class__(bytes(pkt))
 
     def update_layer_2(pkt, src=None, dst=None):
@@ -97,6 +100,8 @@ def main():
             handle_internal(pkt)
         elif pkt.sniffed_on == external_interface:
             handle_external(pkt)
+    
+    sniff(iface=[internal_interface, external_interface], filter='ip', prn=handle)
 
 
 if __name__ == '__main__':
