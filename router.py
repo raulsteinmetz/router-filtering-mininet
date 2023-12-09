@@ -103,13 +103,16 @@ def main():
 
         if is_http_response(pkt):
             if has_http_payload(pkt):
-                print(get_http_payload(pkt))
-                contains_profanity, filtered_content = handle_profanity(pkt, mode='filter')
+                payload_b = get_http_payload(pkt)
+                payload_b_headers, payload_b_body = payload_b.split("\r\n\r\n", 1)
+
+                payload_s_body = payload_b_body.decode('utf-8')
+
+                contains_profanity, filtered_content = handle_profanity(payload_s_body, mode='filter')
+
                 print(f"Contains profanity: {contains_profanity}")
                 print(f"Filtered content: {filtered_content}")
 
-                if contains_profanity:
-                    pkt = adjust_http_content_length(pkt, filtered_content)
 
 
         if pkt.sniffed_on == internal_interface:
