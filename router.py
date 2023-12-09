@@ -54,44 +54,23 @@ def main():
         return Raw in pkt
 
     def get_http_payload(pkt):
-        payload_bytes = pkt[Raw].load
-        try:
-            payload_str = payload_bytes.decode('utf-8')
-            return payload_str
-        except UnicodeDecodeError:
-            return repr(payload_bytes)
+        return pkt[Raw].load
+
+    def convert_load_to_string(load):
+        return load.decode('utf-8')
 
     def print_http_payload(pkt):
         print(f"http package sniffed on \
             {'internal' if pkt.sniffed_on == internal_interface else 'external'} \
-            side with content: {get_http_payload(pkt)}\n", end='\n\n')
+            side with content: {convert_load_to_string(get_http_payload(pkt))}\n", end='\n\n')
         
     def handle_profanity(pkt, mode='block'):
         if mode == 'block':
-            return spot_profanity(get_http_payload(pkt)), 'Profanity blocked'
+            return spot_profanity(convert_load_to_string(get_http_payload(pkt))), 'Profanity blocked'
         elif mode == 'filter':
-            return spot_profanity(get_http_payload(pkt)), filter_profanity(get_http_payload(pkt))
+            return spot_profanity(convert_load_to_string(get_http_payload(pkt))), filter_profanity(get_http_payload(pkt))
 
-
-    def adjust_http_content_length(pkt, new_payload):
-        if Raw in pkt:
-            http_payload = pkt[Raw].load.decode('utf-8')
-            headers, body = http_payload.split("\r\n\r\n", 1)
-
-            # Modify the body here (new_payload should be a string)
-            body = new_payload
-
-            # Update Content-Length
-            headers_lines = headers.split("\r\n")
-            for i, line in enumerate(headers_lines):
-                if line.startswith("Content-Length:"):
-                    headers_lines[i] = "Content-Length: " + str(len(body))
-                    break
-
-            new_http_payload = "\r\n".join(headers_lines) + "\r\n\r\n" + body
-            pkt[Raw].load = new_http_payload.encode('utf-8')
-
-        return pkt
+    
 
     def handle(pkt):
         if sent(pkt):
@@ -103,18 +82,11 @@ def main():
 
         if is_http_response(pkt):
             if has_http_payload(pkt):
-                print_http_payload(pkt)
+                print(get_http_payload(pkt))
                 contains_profanity, filtered_content = handle_profanity(pkt, mode='filter')
                 print(f"Contains profanity: {contains_profanity}")
                 print(f"Filtered content: {filtered_content}")
 
-                if contains_profanity:
-                    # Convert the filtered content back to bytes
-                    filtered_payload_bytes = filtered_content.encode('utf-8')
-                    # Update the packet's payload
-                    pkt[Raw].load = filtered_payload_bytes
-                    # Recalculate checksums
-                    pkt = checksum_recalc(pkt)
 
         if pkt.sniffed_on == internal_interface:
             handle_internal(pkt)
