@@ -74,6 +74,7 @@ def main():
     def adjust_http_content_length(pkt, new_payload):
         if Raw in pkt:
             http_payload = pkt[Raw].load.decode('utf-8')
+            print(http_payload)
             headers, body = http_payload.split("\r\n\r\n", 1)
 
             # Modify the body here (new_payload should be a string)
@@ -106,6 +107,9 @@ def main():
                 contains_profanity, filtered_content = handle_profanity(pkt, mode='filter')
                 print(f"Contains profanity: {contains_profanity}")
                 print(f"Filtered content: {filtered_content}")
+
+                if contains_profanity:
+                    pkt = adjust_http_content_length(pkt, filtered_content)
 
 
         if pkt.sniffed_on == internal_interface:
