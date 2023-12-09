@@ -3,3 +3,4 @@ tenho que atualizar o header do http pra n ser negado do outro lado, mas n sei c
 
 
 ja sei, so pegar o content e criar uma mensagem do zero, e substituir em raw
+if split: substitui por body else so substitui
