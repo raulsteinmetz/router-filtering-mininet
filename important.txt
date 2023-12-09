@@ -1,8 +1,7 @@
 what we'll implement:
 
 -- bad words
--- dns firewall
--- wan optimizer
+-- nat64
 
 
 important commands:
