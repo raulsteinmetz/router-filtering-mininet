@@ -30,6 +30,7 @@ def main():
 
         pkt[Ether].src = None
         pkt[Ether].dst = None
+        
         return checksum_recalc(pkt)
 
     def handle_internal(pkt):
@@ -45,38 +46,44 @@ def main():
 
     def is_http_response(pkt):
         return TCP in pkt and pkt[TCP].sport == 80
+    
+    def has_http_payload(pkt):
+        return Raw in pkt
 
     def get_http_payload(pkt):
-        if Raw in pkt:
-            payload_bytes = pkt[Raw].load
-            try:
-                # Decode the bytes to a string using UTF-8 encoding
-                payload_str = payload_bytes.decode('utf-8')
-                return payload_str
-            except UnicodeDecodeError:
-                # In case of decode error, return a representation of the bytes
-                return repr(payload_bytes)
-        else:
-            return None
+        payload_bytes = pkt[Raw].load
+        try:
+            payload_str = payload_bytes.decode('utf-8')
+            return payload_str
+        except UnicodeDecodeError:
+            return repr(payload_bytes)
 
     def print_http_payload(pkt):
         print(f"http package sniffed on \
             {'internal' if pkt.sniffed_on == internal_interface else 'external'} \
             side with content: {get_http_payload(pkt)}\n", end='\n\n')
+        
+    def handle_profanity(pkt, mode='block'):
+        if mode == 'block':
+            return spot_profanity(get_http_payload(pkt)), 'Profanity blocked'
+        elif mode == 'filter':
+            return spot_profanity(get_http_payload(pkt)), filter_profanity(get_http_payload(pkt))
+
 
     def handle(pkt):
         if sent(pkt):
             return
 
         if is_http_request(pkt):
-            if Raw in pkt:
+            if has_http_payload(pkt):
                 print_http_payload(pkt)
 
         if is_http_response(pkt):
-            if Raw in pkt:
+            if has_http_payload(pkt):
                 print_http_payload(pkt)
-                if (spot_profanity(get_http_payload(pkt)) == True):
-                    print('PROFANITY DETECTED ON HTTP PKT PAYLOAD')
+                contains_profanity, filtered_content = handle_profanity(pkt, mode='filter')
+                print(f"Contains profanity: {contains_profanity}")
+                print(f"Filtered content: {filtered_content}")
 
         if pkt.sniffed_on == internal_interface:
             handle_internal(pkt)
