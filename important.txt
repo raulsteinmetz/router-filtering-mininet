@@ -1,7 +1,6 @@
 what we'll implement:
 
 -- bad words
--- nat64
 
 
 important commands:

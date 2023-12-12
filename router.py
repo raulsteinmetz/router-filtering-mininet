@@ -35,14 +35,6 @@ def main():
 
         return checksum_recalc(pkt)
 
-    def handle_internal(pkt):
-        new = update_layer_2(pkt)
-        sendp(new, iface=external_interface, verbose=False)
-
-    def handle_external(pkt):
-        new = update_layer_2(pkt)
-        sendp(new, iface=internal_interface, verbose=False)
-
     def is_http_request(pkt):
         return TCP in pkt and pkt[TCP].dport == 80
 
@@ -54,20 +46,12 @@ def main():
 
     def get_http_payload(pkt):
         return pkt[Raw].load
-
-    def convert_load_to_string(load):
-        return load.decode('utf-8')
-
-    def print_http_payload(pkt):
-        print(f"http package sniffed on \
-            {'internal' if pkt.sniffed_on == internal_interface else 'external'} \
-            side with content: {convert_load_to_string(get_http_payload(pkt))}\n", end='\n\n')
         
     def handle_profanity(pkt, mode='block'):
         if mode == 'block':
-            return spot_profanity(convert_load_to_string(get_http_payload(pkt))), 'Profanity blocked'
+            return spot_profanity(get_http_payload(pkt).decode('utf-8')), 'Profanity blocked'
         elif mode == 'filter':
-            return spot_profanity(convert_load_to_string(get_http_payload(pkt))), filter_profanity(get_http_payload(pkt))
+            return spot_profanity(get_http_payload(pkt).decode('utf-8')), filter_profanity(get_http_payload(pkt))
 
 
     # inacuratte function, just for reference on http header handle
@@ -92,6 +76,10 @@ def main():
 
         return pkt
 
+    
+
+
+    pkt_buffer = []
 
     def handle(pkt):
         if sent(pkt):
@@ -103,34 +91,35 @@ def main():
                 pass
 
         if is_http_response(pkt):
+            ok = False
             if has_http_payload(pkt):
-                payload_b = get_http_payload(pkt)
-                payload_s = payload_b.decode('utf-8')
 
-                print(payload_s)
-                print(payload_b)
+                if 'OK' in get_http_payload(pkt).decode('utf-8'):
+                    ok = True
+                    pkt_buffer.append(pkt)
+                    print('HTTP OK CONTENT -> ', get_http_payload(pkt).decode('utf-8'))
+                else:
+                    http_payload_str = get_http_payload(pkt).decode('utf-8')
+                    print('HTTP LEN -> ', len(get_http_payload(pkt)))
+                    # contains_profanity, filtered_content = handle_profanity(http_payload_str, mode='filter')
+                    # new_payload_str = filtered_content.eonde('utf-8')
+
 
                 print('\n' * 10)
 
-                # try:
-                #     payload_s_headers, payload_s_body = payload_s.split("\r\n\r\n", 1)
-                #     print(payload_s_body)
-                # except:
-                #     print('couldnt')
-                #     print(payload_s)
-
-
-                # contains_profanity, filtered_content = handle_profanity(payload_s_body, mode='filter')
-
-                # print(f"Contains profanity: {contains_profanity}")
-                # print(f"Filtered content: {filtered_content}")
-
-
-
+        
         if pkt.sniffed_on == internal_interface:
-            handle_internal(pkt)
-        elif pkt.sniffed_on == external_interface:
-            handle_external(pkt)
+            new = update_layer_2(pkt)
+            sendp(new, iface=external_interface, verbose=False)
+        elif pkt.sniffed_on == external_interface and not ok:
+            if len(pkt_buffer) > 0:
+                ok_pkt = pkt_buffer.pop()
+                ok_pkt = update_layer_2(ok_pkt)
+                sendp(ok_pkt, iface=internal_interface, verbose=False)
+            new = update_layer_2(pkt)
+            sendp(new, iface=internal_interface, verbose=False)
+
+
     
     sniff(iface=[internal_interface, external_interface], filter='ip', prn=handle)
 
