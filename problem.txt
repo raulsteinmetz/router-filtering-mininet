@@ -1,2 +1,0 @@
-filtered content has b' content ', but it is in string
-redo the filter so the ** has the lenght of the word

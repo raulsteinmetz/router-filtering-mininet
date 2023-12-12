@@ -73,7 +73,6 @@ def main():
                     contains_profanity, filtered_content = handle_profanity(pkt)
                     if contains_profanity: 
                         http_modified = True
-                        print(filtered_content)
                         pkt[Raw].load = filtered_content
 
         
