@@ -52,73 +52,59 @@ def main():
             return spot_profanity(get_http_payload(pkt).decode('utf-8')), 'Profanity blocked'
         elif mode == 'filter':
             return spot_profanity(get_http_payload(pkt).decode('utf-8')), filter_profanity(get_http_payload(pkt))
-
-
-    # inacuratte function, just for reference on http header handle
-    def adjust_http_content_length(pkt, new_payload):
-        if Raw in pkt:
-            http_payload = pkt[Raw].load.decode('utf-8')
-            print(http_payload)
-            headers, body = http_payload.split("\r\n\r\n", 1)
-
-            # Modify the body here (new_payload should be a string)
-            body = new_payload
-
-            # Update Content-Length
-            headers_lines = headers.split("\r\n")
-            for i, line in enumerate(headers_lines):
-                if line.startswith("Content-Length:"):
-                    headers_lines[i] = "Content-Length: " + str(len(body))
-                    break
-
-            new_http_payload = "\r\n".join(headers_lines) + "\r\n\r\n" + body
-            pkt[Raw].load = new_http_payload.encode('utf-8')
-
-        return pkt
-
     
 
-
     pkt_buffer = []
+    last_len = ''
 
     def handle(pkt):
         if sent(pkt):
             return
 
-        if is_http_request(pkt):
-            if has_http_payload(pkt):
-                # print_http_payload(pkt)
-                pass
+        ok = False
+        is_http = False
+        http_modified = False
 
         if is_http_response(pkt):
-            ok = False
+            is_http = True
             if has_http_payload(pkt):
 
                 if 'OK' in get_http_payload(pkt).decode('utf-8'):
                     ok = True
                     pkt_buffer.append(pkt)
-                    print('HTTP OK CONTENT -> ', get_http_payload(pkt).decode('utf-8'))
                 else:
                     http_payload_str = get_http_payload(pkt).decode('utf-8')
-                    print('HTTP LEN -> ', len(get_http_payload(pkt)))
-                    # contains_profanity, filtered_content = handle_profanity(http_payload_str, mode='filter')
-                    # new_payload_str = filtered_content.eonde('utf-8')
-
-
-                print('\n' * 10)
+                    contains_profanity, filtered_content = handle_profanity(pkt, mode='filter')
+                    if contains_profanity: 
+                        http_modified = True
+                        last_len = str(len(http_payload_str))
+                        pkt[Raw].load = filtered_content.encode('utf-8')
+                        # esse encode aqui que ta dando problema
 
         
         if pkt.sniffed_on == internal_interface:
             new = update_layer_2(pkt)
             sendp(new, iface=external_interface, verbose=False)
-        elif pkt.sniffed_on == external_interface and not ok:
+        elif pkt.sniffed_on == external_interface and is_http and not ok:
             if len(pkt_buffer) > 0:
                 ok_pkt = pkt_buffer.pop()
+
+                if http_modified: # make sure the lengh field is correct
+                    # get payload
+                    ok_pl_b = get_http_payload(ok_pkt)
+                    ok_pl_str = ok_pl_b.decode('utf-8')
+                    ok_pl_str = ok_pl_str.replace(last_len, str(len(get_http_payload(pkt))))
+                    ok_pkt[Raw].load = ok_pl_str.encode('utf-8')
+
+
                 ok_pkt = update_layer_2(ok_pkt)
                 sendp(ok_pkt, iface=internal_interface, verbose=False)
+
             new = update_layer_2(pkt)
             sendp(new, iface=internal_interface, verbose=False)
-
+        else:
+            new = update_layer_2(pkt)
+            sendp(new, iface=internal_interface, verbose=False)
 
     
     sniff(iface=[internal_interface, external_interface], filter='ip', prn=handle)
