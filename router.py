@@ -78,8 +78,8 @@ def main():
                     if contains_profanity: 
                         http_modified = True
                         last_len = str(len(http_payload_str))
-                        pkt[Raw].load = filtered_content.encode('utf-8')
-                        # esse encode aqui que ta dando problema
+                        print(filtered_content)
+                        pkt[Raw].load = filtered_content
 
         
         if pkt.sniffed_on == internal_interface:
@@ -88,15 +88,6 @@ def main():
         elif pkt.sniffed_on == external_interface and is_http and not ok:
             if len(pkt_buffer) > 0:
                 ok_pkt = pkt_buffer.pop()
-
-                if http_modified: # make sure the lengh field is correct
-                    # get payload
-                    ok_pl_b = get_http_payload(ok_pkt)
-                    ok_pl_str = ok_pl_b.decode('utf-8')
-                    ok_pl_str = ok_pl_str.replace(last_len, str(len(get_http_payload(pkt))))
-                    ok_pkt[Raw].load = ok_pl_str.encode('utf-8')
-
-
                 ok_pkt = update_layer_2(ok_pkt)
                 sendp(ok_pkt, iface=internal_interface, verbose=False)
 
