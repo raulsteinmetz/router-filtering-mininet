@@ -1,8 +1,12 @@
-from better_profanity import profanity
+def bad_words_filter(file_path, input_string):
+    contains_bad_words = False
 
-def filter_profanity(string:str):
-    return profanity.censor(string)
+    with open(file_path, 'r') as file:
+        bad_words = [line.strip() for line in file.readlines()]
 
-def spot_profanity(string:str):
-    return profanity.contains_profanity(string)
+    for word in bad_words:
+        if word in input_string:
+            contains_bad_words = True
+            input_string = input_string.replace(word, '*' * len(word))
 
+    return contains_bad_words, input_string

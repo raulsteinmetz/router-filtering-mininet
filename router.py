@@ -1,7 +1,7 @@
 from scapy.all import *
 from scapy.layers.inet import IP, TCP
 from scapy.layers.l2 import Ether
-from util.bad_words import spot_profanity, filter_profanity
+from util.bad_words import bad_words_filter
 
 def main():
     internal_interface = 'r-eth0'
@@ -47,15 +47,11 @@ def main():
     def get_http_payload(pkt):
         return pkt[Raw].load
         
-    def handle_profanity(pkt, mode='block'):
-        if mode == 'block':
-            return spot_profanity(get_http_payload(pkt).decode('utf-8')), 'Profanity blocked'
-        elif mode == 'filter':
-            return spot_profanity(get_http_payload(pkt).decode('utf-8')), filter_profanity(get_http_payload(pkt))
+    def handle_profanity(pkt):
+        return bad_words_filter('./badwords.txt', get_http_payload(pkt).decode('utf-8'))
     
 
     pkt_buffer = []
-    last_len = ''
 
     def handle(pkt):
         if sent(pkt):
@@ -74,10 +70,9 @@ def main():
                     pkt_buffer.append(pkt)
                 else:
                     http_payload_str = get_http_payload(pkt).decode('utf-8')
-                    contains_profanity, filtered_content = handle_profanity(pkt, mode='filter')
+                    contains_profanity, filtered_content = handle_profanity(pkt)
                     if contains_profanity: 
                         http_modified = True
-                        last_len = str(len(http_payload_str))
                         print(filtered_content)
                         pkt[Raw].load = filtered_content
 
