@@ -1,30 +1,33 @@
-# bad-word filtering mininet
+# Bad-Word Filtering in MiniNet
 
-this code implements bad word filtering for http responses
+This implementation is designed for filtering offensive language in HTTP responses using MiniNet. It's a practical solution for maintaining decorum in network communications.
 
-important commands:
-- sudo python3 topo.py (starts mininet topology)
-- iperf -c 8.8.8.8 -c 8888 (check package behaviour on 3 layer)
-- xterm h1 for host terminal inside mininet, xterm r for router, xterm server1 for server
-- python3 client-http.py on client side (requests for server)
-    -- long -> argument that asks for big http responses, if not passed, the requests will be for short messages
-    -- mark_time -> marks time relapsed during requests
-    -- verbose -> when not called, supresses curl prints
-    -- number_of_requests n -> will repeat the requests n times
-    -- plot -> plots request times and moving average
-- python3 server-http.py on server side (listens and respondes)
-- python3 router.py --filter_badwords (router main with activated filter)
-- python3 router.py (router main without filter)
+## Key Commands
+- **Initiate MiniNet Topology**: `sudo python3 topo.py`
+- **Accessing Terminals in MiniNet**:
+  - `xterm h1` for host terminal
+  - `xterm r` for router
+  - `xterm server1` for server
+- **Client-Side Script**: `python3 client-http.py`
+  - `--long`: Requests large HTTP responses.
+  - `--mark_time`: Logs time elapsed during requests.
+  - `--verbose`: Suppresses curl outputs when not used.
+  - `--number_of_requests n`: Repeats the requests 'n' times.
+  - `--plot`: Displays graphs of request times and their moving averages.
+- **Server-Side Script**: `python3 server-http.py`
+- **Router Script with Bad-Word Filtering**: `python3 router.py --filter_badwords`
+- **Router Script without Filtering**: `python3 router.py`
 
-if you are going to run it:
-- make sure to install all pip3 packages with sudo cause mininet only runs on sudo
-- download scapy with pip3 (sudo mode)
-- download mininet from apt
-- download curl from apt
-- download mininet with pip3 (sudo mode)
-- download matplotlib with sudo (sudo mode)
+## Pre-Run Setup
+- **Installation of Dependencies**: Ensure to use `sudo` for all `pip3` installations, as MiniNet requires superuser privileges.
+  - Install `scapy` via `pip3` (sudo mode).
+  - Install `mininet` using `apt`.
+  - Install `curl` using `apt`.
+  - Install `matplotlib` using `sudo` (sudo mode).
 
-### file in server
+## Sample Content
+
+### HTML File on Server
 ```
 <!DOCTYPE html>
 <html>
@@ -38,8 +41,9 @@ if you are going to run it:
 </html>
 ```
 
-### file received by client
+### HTML File as Received by Client
 ```
+<!DOCTYPE html>
 <!DOCTYPE html>
 <html>
 <head>
@@ -51,3 +55,5 @@ if you are going to run it:
 </body>
 </html>
 ```
+
+
