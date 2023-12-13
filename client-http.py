@@ -2,7 +2,7 @@ import os
 import argparse
 import time
 
-def send_http_request(long, mark_time):
+def send_http_request(long, mark_time, verbose):
     server_ip = '8.8.8.8'
     port = '80'
 
@@ -18,10 +18,11 @@ def send_http_request(long, mark_time):
         ]
 
     for url in urls:
-        if not mark_time:
+        if verbose:
             print(f"Sending HTTP GET request to {url}")
+
         start_time = time.time()
-        os.system(f'curl {url} {"-s" if mark_time else ""}')
+        os.system(f'curl {url} {"-s" if not verbose else ""}')
         end_time = time.time()
 
         if mark_time:
@@ -31,6 +32,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--long', action='store_true', help='Request URLs with lots of text')
     parser.add_argument('--mark_time', action='store_true', help='Print the time elapsed during requests')
+    parser.add_argument('--verbose', action='store_true', help='Print curl command output')
     args = parser.parse_args()
 
-    send_http_request(args.long, args.mark_time)
+    send_http_request(args.long, args.mark_time, args.verbose)
