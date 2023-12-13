@@ -17,6 +17,9 @@ def send_http_request(long, mark_time, verbose, number_of_requests):
             f'http://{server_ip}:{port}/bw.html'
         ]
 
+    # Initialize a dictionary to store cumulative time for each URL
+    cumulative_time = {url: 0 for url in urls}
+
     for _ in range(number_of_requests):
         for url in urls:
             if verbose:
@@ -25,9 +28,19 @@ def send_http_request(long, mark_time, verbose, number_of_requests):
             start_time = time.time()
             os.system(f'curl --silent -o /dev/null {"-s" if not verbose else ""} {url}')
             end_time = time.time()
+            elapsed_time = end_time - start_time
+
+            # Add elapsed time to the cumulative time for this URL
+            cumulative_time[url] += elapsed_time
 
             if mark_time:
-                print(f"Request to {url} completed in {end_time - start_time:.2f} seconds")
+                print(f"Request to {url} completed in {elapsed_time:.2f} seconds")
+
+    # Calculate and print the average time for each URL
+    if mark_time:
+        for url in urls:
+            average_time = cumulative_time[url] / number_of_requests
+            print(f"Average time for {url}: {average_time:.2f} seconds")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
