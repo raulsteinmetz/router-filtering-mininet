@@ -1,7 +1,7 @@
 from scapy.all import *
 from scapy.layers.inet import IP, TCP
 from scapy.layers.l2 import Ether
-from util.bad_words import bad_words_filter
+from util.bad_words import BadWordsFilter
 import argparse
 
 def main(badwords_filter):
@@ -49,7 +49,7 @@ def main(badwords_filter):
         return pkt[Raw].load
         
     def handle_profanity(pkt):
-        return bad_words_filter('./badwords.txt', get_http_payload(pkt).decode('utf-8'))
+        return bwfilter.filter(get_http_payload(pkt).decode('utf-8'))
     
 
     class OkMsg:
@@ -64,9 +64,13 @@ def main(badwords_filter):
             if ok_msg.ip_src == ip_src and ok_msg.ip_dst == ip_dst:
                 ok_pkt_buffer.remove(ok_msg)
                 return ok_msg
-            
+        return None           
 
     ok_pkt_buffer = []
+
+    bwfilter = BadWordsFilter('./badwords.txt')
+
+
 
 
     def handle(pkt):
@@ -75,9 +79,9 @@ def main(badwords_filter):
 
         ok = False
         is_http = False
-        http_modified = False
 
         if badwords_filter:
+
             if is_http_response(pkt):
                 is_http = True
                 if has_http_payload(pkt):
@@ -86,10 +90,8 @@ def main(badwords_filter):
                         ok = True
                         ok_pkt_buffer.append(OkMsg(pkt))
                     else:
-                        http_payload_str = get_http_payload(pkt).decode('utf-8')
                         contains_profanity, filtered_content = handle_profanity(pkt)
                         if contains_profanity: 
-                            http_modified = True
                             pkt[Raw].load = filtered_content
 
         
@@ -116,6 +118,6 @@ def main(badwords_filter):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--badwords_filter', action='store_true', help='enables bad words filter')
+    parser.add_argument('--filter_badwords', action='store_true', help='enables bad words filter')
     args = parser.parse_args()
-    main(args.badwords_filter)
+    main(args.filter_badwords)
