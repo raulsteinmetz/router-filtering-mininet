@@ -2,8 +2,9 @@ from scapy.all import *
 from scapy.layers.inet import IP, TCP
 from scapy.layers.l2 import Ether
 from util.bad_words import bad_words_filter
+import argparse
 
-def main():
+def main(badwords_filter):
     internal_interface = 'r-eth0'
     external_interface = 'r-eth1'
 
@@ -76,25 +77,26 @@ def main():
         is_http = False
         http_modified = False
 
-        if is_http_response(pkt):
-            is_http = True
-            if has_http_payload(pkt):
+        if badwords_filter:
+            if is_http_response(pkt):
+                is_http = True
+                if has_http_payload(pkt):
 
-                if 'OK' in get_http_payload(pkt).decode('utf-8'):
-                    ok = True
-                    ok_pkt_buffer.append(OkMsg(pkt))
-                else:
-                    http_payload_str = get_http_payload(pkt).decode('utf-8')
-                    contains_profanity, filtered_content = handle_profanity(pkt)
-                    if contains_profanity: 
-                        http_modified = True
-                        pkt[Raw].load = filtered_content
+                    if 'OK' in get_http_payload(pkt).decode('utf-8'):
+                        ok = True
+                        ok_pkt_buffer.append(OkMsg(pkt))
+                    else:
+                        http_payload_str = get_http_payload(pkt).decode('utf-8')
+                        contains_profanity, filtered_content = handle_profanity(pkt)
+                        if contains_profanity: 
+                            http_modified = True
+                            pkt[Raw].load = filtered_content
 
         
         if pkt.sniffed_on == internal_interface:
             new = update_layer_2(pkt)
             sendp(new, iface=external_interface, verbose=False)
-        elif pkt.sniffed_on == external_interface and is_http and not ok:
+        elif pkt.sniffed_on == external_interface and is_http and not ok and badwords_filter:
             if len(ok_pkt_buffer) > 0:
                 crt_src = pkt[IP].src
                 crt_dst = pkt[IP].dst
@@ -104,7 +106,7 @@ def main():
 
             new = update_layer_2(pkt)
             sendp(new, iface=internal_interface, verbose=False)
-        else:
+        elif pkt.sniffed_on == external_interface and not badwords_filter:
             new = update_layer_2(pkt)
             sendp(new, iface=internal_interface, verbose=False)
 
@@ -113,4 +115,7 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--badwords_filter', action='store_true', help='enables bad words filter')
+    args = parser.parse_args()
+    main(args.badwords_filter)
