@@ -58,10 +58,10 @@ def main():
             self.ip_dst = pkt[IP].dst
 
 
-    def pop_pkt(ip_src, ip_dst):
+    def pop_ok_pkt(ip_src, ip_dst):
         for ok_msg in ok_pkt_buffer:
             if ok_msg.ip_src == ip_src and ok_msg.ip_dst == ip_dst:
-                
+                ok_pkt_buffer.remove(ok_msg)
                 return ok_msg
             
 
@@ -98,8 +98,7 @@ def main():
             if len(ok_pkt_buffer) > 0:
                 crt_src = pkt[IP].src
                 crt_dst = pkt[IP].dst
-                
-                ok_pkt = ok_pkt_buffer.pop().pkt
+                ok_pkt = pop_ok_pkt(crt_src, crt_dst).pkt
                 ok_pkt = update_layer_2(ok_pkt)
                 sendp(ok_pkt, iface=internal_interface, verbose=False)
 
