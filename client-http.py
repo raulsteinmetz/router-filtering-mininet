@@ -50,7 +50,25 @@ def send_http_request(long, mark_time, verbose, number_of_requests, plot):
         print(f"{url} - Bytes per second: {bytes_per_second:.2f}, Packets per second: {packets_per_second:.2f}")
 
     if plot:
-        # [Plotting code as before]
+        for url, times in timings.items():
+            plt.figure()
+
+            # Calculate moving average
+            moving_avg = np.convolve(times, np.ones(5)/5, mode='valid')
+
+            plt.plot(times, label='Response Time')
+            plt.plot(range(4, len(times)), moving_avg, label='Moving Average (5)', linestyle='--')
+
+            plt.xlabel('Request Number')
+            plt.ylabel('Time (seconds)')
+            plt.title(f'Timings for {url}')
+            plt.legend()
+            plt.grid(True)
+
+            if not os.path.exists('./analysis'):
+                os.makedirs('./analysis')
+
+            plt.savefig(f'./analysis/timing_{url.split("/")[-1]}.png')
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
