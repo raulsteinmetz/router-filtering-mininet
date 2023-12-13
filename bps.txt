@@ -1,0 +1,15 @@
+statistics over 5 alternated requests between long files
+
+BYTES PER SECOND
+
+no filter, file with bw -> 7880.98
+with filter, file with bw -> 8850.81
+no filter, file without bw -> 10002.07
+with filter, file without bw ->10679.06
+
+PACKETS PER SECOND
+
+no filter, file with bw -> 123.14
+with filter, file with bw -> 138.29
+no filter, file without bw -> 156.28
+with filter, file without bw -> 166.86
