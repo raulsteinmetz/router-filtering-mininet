@@ -22,7 +22,7 @@ def send_http_request(long, mark_time, verbose):
             print(f"Sending HTTP GET request to {url}")
 
         start_time = time.time()
-        os.system(f'curl {url} {"-s" if not verbose else ""}')
+        os.system(f'curl --silent -o /dev/null {"-s" if not verbose else ""} {url}')
         end_time = time.time()
 
         if mark_time:
