@@ -51,7 +51,22 @@ def main():
         return bad_words_filter('./badwords.txt', get_http_payload(pkt).decode('utf-8'))
     
 
-    pkt_buffer = []
+    class OkMsg:
+        def __init__(self, pkt):
+            self.pkt = pkt
+            self.ip_src = pkt[IP].src
+            self.ip_dst = pkt[IP].dst
+
+
+    def pop_pkt(ip_src, ip_dst):
+        for ok_msg in ok_pkt_buffer:
+            if ok_msg.ip_src == ip_src and ok_msg.ip_dst == ip_dst:
+                
+                return ok_msg
+            
+
+    ok_pkt_buffer = []
+
 
     def handle(pkt):
         if sent(pkt):
@@ -67,7 +82,7 @@ def main():
 
                 if 'OK' in get_http_payload(pkt).decode('utf-8'):
                     ok = True
-                    pkt_buffer.append(pkt)
+                    ok_pkt_buffer.append(OkMsg(pkt))
                 else:
                     http_payload_str = get_http_payload(pkt).decode('utf-8')
                     contains_profanity, filtered_content = handle_profanity(pkt)
@@ -80,8 +95,11 @@ def main():
             new = update_layer_2(pkt)
             sendp(new, iface=external_interface, verbose=False)
         elif pkt.sniffed_on == external_interface and is_http and not ok:
-            if len(pkt_buffer) > 0:
-                ok_pkt = pkt_buffer.pop()
+            if len(ok_pkt_buffer) > 0:
+                crt_src = pkt[IP].src
+                crt_dst = pkt[IP].dst
+                
+                ok_pkt = ok_pkt_buffer.pop().pkt
                 ok_pkt = update_layer_2(ok_pkt)
                 sendp(ok_pkt, iface=internal_interface, verbose=False)
 
