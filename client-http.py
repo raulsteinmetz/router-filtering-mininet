@@ -1,24 +1,30 @@
 import os
+import argparse
 
-def send_http_request():
+def send_http_request(long):
     server_ip = '8.8.8.8'
     port = '80'
 
-    url = f'http://{server_ip}:{port}/no-bw.html'  # Requesting the index.html file
-    print(f"Sending HTTP GET request to {url}")
-    os.system(f'curl {url}')
+    if long:
+        # Request only the pages with lots of text
+        urls = [
+            f'http://{server_ip}:{port}/contains-lots-of-text.html',
+            f'http://{server_ip}:{port}/contains-lots-of-text-bw.html'
+        ]
+    else:
+        # Request the other pages
+        urls = [
+            f'http://{server_ip}:{port}/no-bw.html',
+            f'http://{server_ip}:{port}/bw.html'
+        ]
 
-    url = f'http://{server_ip}:{port}/bw.html'  # Requesting the index.html file
-    print(f"Sending HTTP GET request to {url}")
-    os.system(f'curl {url}')
-
-    url = f'http://{server_ip}:{port}/contains-lots-of-text.html'
-    print(f"Sending HTTP GET request to {url}")
-    os.system(f'curl {url}')
-
-    url = f'http://{server_ip}:{port}/contains-lots-of-text-bw.html'
-    print(f"Sending HTTP GET request to {url}")
-    os.system(f'curl {url}')
+    for url in urls:
+        print(f"Sending HTTP GET request to {url}")
+        os.system(f'curl {url}')
 
 if __name__ == "__main__":
-    send_http_request()
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--long', action='store_true', help='Request URLs with lots of text')
+    args = parser.parse_args()
+
+    send_http_request(args.long)
