@@ -12,6 +12,7 @@ important commands:
     -- mark_time -> marks time relapsed during requests
     -- verbose -> when not called, supresses curl prints
     -- number_of_requests n -> will repeat the requests n times
+    -- plot -> plots request times and moving average
 
 - python3 server-http.py on server side (listens and respondes)
 - python3 router.py --filter_badwords (router main with activated filter)
@@ -19,7 +20,8 @@ important commands:
 
 if you are going to run it:
 - make sure to install all pip3 packages with sudo cause mininet only runs on sudo
-- download scapy with pip3
+- download scapy with pip3 (sudo mode)
 - download mininet from apt
 - download curl from apt
-- download mininet in pip3 also
+- download mininet with pip3 (sudo mode)
+- download matplotlib with sudo (sudo mode)

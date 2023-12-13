@@ -2,6 +2,7 @@ import os
 import argparse
 import time
 import matplotlib.pyplot as plt
+import numpy as np
 
 def send_http_request(long, mark_time, verbose, number_of_requests, plot):
     server_ip = '8.8.8.8'
@@ -18,7 +19,6 @@ def send_http_request(long, mark_time, verbose, number_of_requests, plot):
             f'http://{server_ip}:{port}/bw.html'
         ]
 
-    # Initialize a dictionary to store timings for each URL
     timings = {url: [] for url in urls}
 
     for _ in range(number_of_requests):
@@ -30,8 +30,6 @@ def send_http_request(long, mark_time, verbose, number_of_requests, plot):
             os.system(f'curl --silent -o /dev/null {"-s" if not verbose else ""} {url}')
             end_time = time.time()
             elapsed_time = end_time - start_time
-
-            # Log the elapsed time for this URL
             timings[url].append(elapsed_time)
 
             if mark_time:
@@ -40,18 +38,22 @@ def send_http_request(long, mark_time, verbose, number_of_requests, plot):
     if plot:
         for url, times in timings.items():
             plt.figure()
+
+            # Calculate moving average
+            moving_avg = np.convolve(times, np.ones(5)/5, mode='valid')
+
             plt.plot(times, label='Response Time')
+            plt.plot(range(4, len(times)), moving_avg, label='Moving Average (5)', linestyle='--')
+
             plt.xlabel('Request Number')
             plt.ylabel('Time (seconds)')
             plt.title(f'Timings for {url}')
             plt.legend()
             plt.grid(True)
 
-            # Ensure the analysis directory exists
             if not os.path.exists('./analysis'):
                 os.makedirs('./analysis')
 
-            # Save the plot
             plt.savefig(f'./analysis/timing_{url.split("/")[-1]}.png')
 
 if __name__ == "__main__":
