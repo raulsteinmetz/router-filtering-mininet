@@ -30,8 +30,15 @@ def send_http_request(long, mark_time, verbose, number_of_requests, plot):
                 print(f"Sending HTTP GET request to {url}")
 
             start_time = time.time()
-            result = subprocess.run(f'curl --silent -o /dev/null -w "%{{size_download}}" {"-s" if not verbose else ""} {url}', 
-                                    shell=True, capture_output=True, text=True)
+            # Adjusting curl command based on verbose flag
+            if verbose:
+                # Output to console and save file
+                result = subprocess.run(f'curl -o ./received_file.html -w "%{{size_download}}" {url}', 
+                                        shell=True, capture_output=True, text=True)
+            else:
+                # Run silently
+                result = subprocess.run(f'curl --silent -o /dev/null -w "%{{size_download}}" {url}', 
+                                        shell=True, capture_output=True, text=True)
             end_time = time.time()
             elapsed_time = end_time - start_time
             timings[url].append(elapsed_time)
@@ -39,6 +46,7 @@ def send_http_request(long, mark_time, verbose, number_of_requests, plot):
 
             if mark_time:
                 print(f"Request to {url} completed in {elapsed_time:.2f} seconds")
+
 
     # Compute and print bytes per second and packets per second
     for url in urls:
