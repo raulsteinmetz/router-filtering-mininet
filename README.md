@@ -24,3 +24,30 @@ if you are going to run it:
 - download mininet with pip3 (sudo mode)
 - download matplotlib with sudo (sudo mode)
 
+### file in server
+```
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Page</title>
+</head>
+<body>
+    <h1>Hello from Server 1</h1>
+    <p>This is a test page served from server1. fuck you, you bitch, you fucking cunt</p>
+</body>
+</html>
+```
+
+### file received by client
+```
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Page</title>
+</head>
+<body>
+    <h1>Hello from Server 1</h1>
+    <p>This is a test page served from server1. **** you, you *****, you ****ing ****</p>
+</body>
+</html>
+```
