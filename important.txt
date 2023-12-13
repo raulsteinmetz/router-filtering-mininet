@@ -2,15 +2,14 @@ what we'll implement:
 
 -- bad words
 
--- proxy
-
 
 important commands:
 - iperf -c 8.8.8.8 -c 8888 (check package behaviour on 3 and 4 layer)
 - python3 client-http.py on client side (requests for server)
 - python3 server-http.py on server side (listens and respondes)
 - sudo python3 topo.py (starts mininet topology)
-- python3 router.py (router main)
+- python3 router.py --filter_badwords (router main with activated filter)
+- python3 router.py (router main without filter)
 
 if you are going to run it:
 - make sure to install all pip3 packages with sudo cause mininet only runs on sudo
