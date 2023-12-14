@@ -11,7 +11,7 @@ This implementation is designed for filtering offensive language in HTTP respons
 - **Client-Side Script**: `python3 client-http.py`
   - `--long`: Requests large HTTP responses.
   - `--mark_time`: Logs time elapsed during requests.
-  - `--verbose`: Suppresses curl outputs when not used.
+  - `--verbose`: Suppresses request outputs when not used.
   - `--number_of_requests n`: Repeats the requests 'n' times.
   - `--plot`: Displays graphs of request times and their moving averages.
 - **Server-Side Script**: `python3 server-http.py`
