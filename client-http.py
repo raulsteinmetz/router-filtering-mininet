@@ -39,6 +39,9 @@ def send_http_request(long, mark_time, verbose, number_of_requests, plot):
             timings[url].append(elapsed_time)
             data_transferred[url].append(len(response.content))
 
+            if verbose:
+                print(response.content)
+
             if mark_time:
                 print(f"Request to {url} completed in {elapsed_time:.2f} seconds")
 
