@@ -4,11 +4,13 @@ import time
 import matplotlib.pyplot as plt
 import numpy as np
 import subprocess
+import requests
+
+packet_size = 64
 
 def send_http_request(long, mark_time, verbose, number_of_requests, plot):
     server_ip = '8.8.8.8'
     port = '80'
-    packet_size = 64  # in bytes
 
     if long:
         urls = [
@@ -30,23 +32,15 @@ def send_http_request(long, mark_time, verbose, number_of_requests, plot):
                 print(f"Sending HTTP GET request to {url}")
 
             start_time = time.time()
-            # Adjusting curl command based on verbose flag
-            if verbose:
-                # Output to console and save file
-                result = subprocess.run(f'curl -o ./received_file.html -w "%{{size_download}}" {url}', 
-                                        shell=True, capture_output=True, text=True)
-            else:
-                # Run silently
-                result = subprocess.run(f'curl --silent -o /dev/null -w "%{{size_download}}" {url}', 
-                                        shell=True, capture_output=True, text=True)
+            response = requests.get(url)
             end_time = time.time()
+
             elapsed_time = end_time - start_time
             timings[url].append(elapsed_time)
-            data_transferred[url].append(int(result.stdout.strip()))
+            data_transferred[url].append(len(response.content))
 
             if mark_time:
                 print(f"Request to {url} completed in {elapsed_time:.2f} seconds")
-
 
     # Compute and print bytes per second and packets per second
     for url in urls:
