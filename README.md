@@ -22,7 +22,6 @@ This implementation is designed for filtering offensive language in HTTP respons
 - **Installation of Dependencies**: Ensure to use `sudo` for all `pip3` installations, as MiniNet requires superuser privileges.
   - Install `scapy` via `pip3` (sudo mode).
   - Install `mininet` using `apt`.
-  - Install `curl` using `apt`.
   - Install `matplotlib` using `sudo` (sudo mode).
 
 ## Sample Content
