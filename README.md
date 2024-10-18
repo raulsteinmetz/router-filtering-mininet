@@ -35,7 +35,7 @@ This implementation is designed for filtering offensive language in HTTP respons
 </head>
 <body>
     <h1>Hello from Server 1</h1>
-    <p>This is a test page served from server1. fuck you, you bitch, you fucking cunt</p>
+    <p>This is a test page served from server1. fuck you, you fuck, you fucking cunt</p>
 </body>
 </html>
 ```
@@ -50,7 +50,7 @@ This implementation is designed for filtering offensive language in HTTP respons
 </head>
 <body>
     <h1>Hello from Server 1</h1>
-    <p>This is a test page served from server1. **** you, you *****, you ****ing ****</p>
+    <p>This is a test page served from server1. **** you, you ****, you ****ing ****</p>
 </body>
 </html>
 ```
